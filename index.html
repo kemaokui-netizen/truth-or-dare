@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>真心话大冒险 - 情侣版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #999;
+            font-size: 0.9em;
+            margin-bottom: 30px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 20px;
+            border: none;
+            border-radius: 20px;
+            font-size: 1.3em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:active::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn-truth {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn-dare {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .result-card {
+            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            border-radius: 20px;
+            padding: 30px;
+            min-height: 200px;
+            display: none;
+            animation: slideIn 0.5s ease;
+        }
+
+        .result-card.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-type {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 15px;
+        }
+
+        .result-content {
+            font-size: 1.4em;
+            color: #333;
+            line-height: 1.6;
+            font-weight: 500;
+        }
+
+        .level-selector {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .level-btn {
+            padding: 10px 20px;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9em;
+        }
+
+        .level-btn.active {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .emoji {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+
+        .next-btn {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .next-btn:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💕 真心话大冒险</h1>
+        <p class="subtitle">情侣专属版</p>
+
+        <div class="level-selector">
+            <button class="level-btn active" data-level="mild">温柔版</button>
+            <button class="level-btn" data-level="spicy">火辣版</button>
+            <button class="level-btn" data-level="wild">狂野版</button>
+        </div>
+
+        <div class="button-group">
+            <button class="btn btn-truth" onclick="showTruth()">
+                💭<br>真心话
+            </button>
+            <button class="btn btn-dare" onclick="showDare()">
+                🎯<br>大冒险
+            </button>
+        </div>
+
+        <div class="result-card" id="resultCard">
+            <div class="emoji" id="emoji">💝</div>
+            <div class="result-type" id="resultType"></div>
+            <div class="result-content" id="resultContent"></div>
+            <button class="next-btn" onclick="hideResult()">再来一次</button>
+        </div>
+    </div>
+
+    <script>
+        let currentLevel = 'mild';
+
+        const questions = {
+            truth: {
+                mild: [
+                    "你最喜欢我身上的哪个部位？",
+                    "你觉得我们第一次见面时，你对我的第一印象是什么？",
+                    "你有没有偷偷看过我的手机？",
+                    "你做过最浪漫的梦是关于我的吗？",
+                    "你最想和我一起去哪里旅行？",
+                    "你觉得我们之间最甜蜜的时刻是什么时候？",
+                    "你有没有在朋友面前夸过我？夸了什么？",
+                    "你最喜欢我对你说的哪句话？",
+                    "如果可以，你想改变我的哪一点？",
+                    "你有没有因为想我而失眠过？"
+                ],
+                spicy: [
+                    "你对我们的第一次亲密接触有什么感觉？",
+                    "你最想尝试但还没尝试过的亲密方式是什么？",
+                    "你觉得我身材最性感的地方是哪里？",
+                    "你有没有幻想过和我在特殊的地方做特别的事？",
+                    "你最喜欢我穿什么样的衣服？",
+                    "你有没有偷偷看过不该看的内容然后想到我？",
+                    "你觉得我们之间最刺激的一次是什么时候？",
+                    "你有没有在公共场合对我产生过冲动？",
+                    "你最想让我对你做什么？",
+                    "你有没有因为我而做过羞羞的梦？"
+                ],
+                wild: [
+                    "说出你最大胆的性幻想，关于我的。",
+                    "你有没有在想我的时候自己解决过？多久一次？",
+                    "你最想在哪里和我做爱？",
+                    "你觉得我床上表现打几分？哪里需要改进？",
+                    "你有没有想过和我尝试一些特殊的玩法？",
+                    "你看过的片子里，最想和我重现的是哪个场景？",
+                    "你有没有在我不知道的情况下对我起过反应？",
+                    "你最想听我在床上对你说什么？",
+                    "如果可以，你想和我玩角色扮演吗？扮演什么？",
+                    "你有没有偷偷闻过我的衣服或者其他东西？"
+                ]
+            },
+            dare: {
+                mild: [
+                    "给对方一个深情的拥抱，持续30秒",
+                    "对着对方的眼睛说"我爱你"三遍",
+                    "亲吻对方的额头",
+                    "给对方发一条肉麻的情话",
+                    "让对方躺在你腿上，给TA按摩头部5分钟",
+                    "和对方十指紧扣，对视1分钟不许笑",
+                    "给对方唱一首情歌",
+                    "用公主抱抱起对方转三圈",
+                    "亲吻对方的手背，像王子/公主一样",
+                    "给对方喂一口食物或水"
+                ],
+                spicy: [
+                    "亲吻对方的脖子10秒",
+                    "咬一下对方的耳朵",
+                    "让对方坐在你腿上，拥抱2分钟",
+                    "隔着衣服亲吻对方的胸口",
+                    "用舌头舔对方的耳朵",
+                    "把手伸进对方的衣服里，抚摸后背1分钟",
+                    "亲吻对方的锁骨",
+                    "让对方躺下，你趴在TA身上亲吻",
+                    "咬对方的嘴唇",
+                    "用手指轻轻划过对方的敏感部位"
+                ],
+                wild: [
+                    "脱掉一件衣服",
+                    "让对方用嘴咬开你的一颗扣子",
+                    "亲吻对方身体的任意三个部位，由对方指定",
+                    "给对方一个法式湿吻，持续1分钟",
+                    "让对方坐在你腿上，面对面拥抱并亲吻",
+                    "用冰块含在嘴里，然后亲吻对方的脖子",
+                    "让对方躺下，你用嘴唇从脖子吻到肚脐",
+                    "脱到只剩内衣，让对方欣赏1分钟",
+                    "让对方用嘴解开你的皮带或内衣扣",
+                    "两人一起洗个鸳鸯浴（如果条件允许）"
+                ]
+            }
+        };
+
+        // 切换难度等级
+        document.querySelectorAll('.level-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.level-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentLevel = this.dataset.level;
+            });
+        });
+
+        function showTruth() {
+            const truthList = questions.truth[currentLevel];
+            const randomTruth = truthList[Math.floor(Math.random() * truthList.length)];
+
+            document.getElementById('emoji').textContent = '💭';
+            document.getElementById('resultType').textContent = '真心话';
+            document.getElementById('resultContent').textContent = randomTruth;
+            document.getElementById('resultCard').classList.add('show');
+        }
+
+        function showDare() {
+            const dareList = questions.dare[currentLevel];
+            const randomDare = dareList[Math.floor(Math.random() * dareList.length)];
+
+            document.getElementById('emoji').textContent = '🎯';
+            document.getElementById('resultType').textContent = '大冒险';
+            document.getElementById('resultContent').textContent = randomDare;
+            document.getElementById('resultCard').classList.add('show');
+        }
+
+        function hideResult() {
+            document.getElementById('resultCard').classList.remove('show');
+        }
+    </script>
+</body>
+</html>
